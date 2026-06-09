@@ -114,8 +114,56 @@ CSVエクスポートはExcelやGoogleスプレッドシートで開きやすい
 - localStorageキー: `kensho_campaign_dashboard_v1`
 - バックエンド、外部DB、外部APIは使っていません。
 - ブラウザや端末を変えるとデータは共有されません。
+- GitHub Pagesに公開しても、データはクラウド同期されません。
+- Macで登録したデータはスマホには自動同期されません。
+- スマホで登録したデータはMacには自動同期されません。
+- 端末間で移す場合はJSONエクスポート / インポートを使ってください。
 - ブラウザのデータ削除、プライベートブラウズ、別プロファイル利用でデータが消える場合があります。
+- ブラウザのキャッシュ削除やサイトデータ削除でデータが消える可能性があります。
 - 定期的なJSONエクスポートを推奨します。
+
+## GitHub Pages公開手順
+
+このアプリはビルド不要の静的サイトです。`index.html` がリポジトリのルートにあり、CSSとJavaScriptは相対パスで読み込むため、GitHub Pagesでそのまま公開できます。
+
+1. GitHubで新しいリポジトリを作成します。
+2. ローカルリポジトリにremoteを追加します。
+3. `main` ブランチへpushします。
+4. GitHubのリポジトリ画面で `Settings` → `Pages` を開きます。
+5. `Source` を `Deploy from a branch` に設定します。
+6. `Branch` を `main`、folderを `/root` に設定します。
+7. 表示された公開URLにアクセスします。
+
+コマンド例:
+
+```bash
+git remote add origin https://github.com/ユーザー名/リポジトリ名.git
+git branch -M main
+git push -u origin main
+```
+
+公開後のURL例:
+
+```text
+https://ユーザー名.github.io/リポジトリ名/
+```
+
+テスト画面:
+
+```text
+https://ユーザー名.github.io/リポジトリ名/tests.html
+```
+
+### GitHub Pages公開後の注意
+
+GitHub PagesはHTML、CSS、JavaScriptを配信するだけです。キャンペーンデータはGitHub上には保存されず、各ブラウザの localStorage に保存されます。
+
+- PCとスマホのデータは自動同期されません。
+- ブラウザごと、端末ごとに別データになります。
+- 端末移行や共有にはJSONエクスポート / インポートを使ってください。
+- 重要なデータは定期的にJSONバックアップを取ってください。
+
+詳しい公開手順は [docs/DEPLOY.md](docs/DEPLOY.md)、バックアップ手順は [docs/BACKUP.md](docs/BACKUP.md) を参照してください。
 
 ## テスト方法
 
@@ -161,7 +209,11 @@ CSVエクスポートはExcelやGoogleスプレッドシートで開きやすい
 ├── README.md
 ├── CHANGELOG.md
 ├── DATA_SCHEMA.md
-└── SAFETY.md
+├── SAFETY.md
+├── .nojekyll
+└── docs/
+    ├── DEPLOY.md
+    └── BACKUP.md
 ```
 
 ## 安全設計
@@ -174,6 +226,19 @@ CSVエクスポートはExcelやGoogleスプレッドシートで開きやすい
 - JSONインポート時に配列形式、URL、日付、タグ、ステータスなどを検証します。
 - localStorageデータが破損していても、空配列で復旧します。
 - CSVはBOM付きUTF-8で出力し、日本語文字化けを抑えます。
+
+## 公開前チェックリスト
+
+- 通常画面が開く
+- テスト画面が開く
+- 全テストが成功する
+- サンプルデータ投入ができる
+- JSONエクスポートできる
+- JSONインポートできる
+- CSVエクスポートできる
+- スマホ幅で表示が崩れない
+- 禁止機能が追加されていない
+- localStorageの注意をREADMEや運用ドキュメントに書いている
 
 ## 今後の拡張案
 

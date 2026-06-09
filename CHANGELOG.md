@@ -2,6 +2,14 @@
 
 このプロジェクトの主な変更履歴です。
 
+## v0.9.0
+
+- GitHub Pages公開手順をREADMEに追加
+- `docs/DEPLOY.md` を追加
+- `docs/BACKUP.md` を追加
+- GitHub Pages向けに `.nojekyll` を追加
+- localStorage運用上の注意と公開前チェックリストを追記
+
 ## v0.8.0
 
 - Git管理を開始

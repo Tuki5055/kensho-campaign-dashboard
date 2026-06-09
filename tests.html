@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>懸賞ダッシュボード 自動テスト</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .test-header { margin: 24px 0 16px; }
+    .test-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+    .test-card { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; padding: 12px; }
+    .test-card.pass { border-left: 5px solid var(--green); }
+    .test-card.fail { border-left: 5px solid var(--red); background: #fffafa; }
+    .test-card pre { white-space: pre-wrap; word-break: break-word; background: #f8fafc; border-radius: var(--radius); padding: 10px; overflow: auto; }
+    .test-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    @media (max-width: 700px) {
+      .test-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="test-header">
+      <div>
+        <h1>自動テスト</h1>
+        <p class="lead">懸賞キャンペーン応募支援ダッシュボードの主要ロジックを、外部ライブラリなしで検証します。</p>
+      </div>
+      <div class="safe-note">テスト前後で本番localStorageを退避・復元します。</div>
+    </header>
+
+    <section class="panel">
+      <div class="test-actions">
+        <button id="runTests">テスト実行</button>
+        <a class="button-like" href="index.html">アプリへ戻る</a>
+      </div>
+      <div class="test-summary">
+        <div class="stat"><b id="totalCount">0</b><span>全テスト件数</span></div>
+        <div class="stat"><b id="passCount">0</b><span>成功件数</span></div>
+        <div class="stat"><b id="failCount">0</b><span>失敗件数</span></div>
+        <div class="stat"><b id="statusText">未実行</b><span>状態</span></div>
+      </div>
+      <div id="failedNames" class="empty">まだテストは実行されていません。</div>
+    </section>
+
+    <section class="panel" style="margin-top:14px">
+      <h2>詳細ログ</h2>
+      <div id="testResults" class="grid"></div>
+    </section>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/tags.js"></script>
+  <script src="js/filter.js"></script>
+  <script src="js/risk.js"></script>
+  <script src="js/score.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/comments.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/sampleData.js"></script>
+  <script src="js/baseUi.js"></script>
+  <script src="js/formUi.js"></script>
+  <script src="js/todayUi.js"></script>
+  <script src="js/listUi.js"></script>
+  <script src="js/detailUi.js"></script>
+  <script src="js/historyUi.js"></script>
+  <script src="js/commentsUi.js"></script>
+  <script src="js/analyticsUi.js"></script>
+  <script src="js/backupUi.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/tests.js"></script>
+</body>
+</html>

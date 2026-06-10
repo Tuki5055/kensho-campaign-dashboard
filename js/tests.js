@@ -95,6 +95,7 @@
       runTagExportTests();
       runApplicationHistoryTests();
       runReminderTests();
+      runPwaTests();
       runBrokenLocalStorageTests();
     } finally {
       restoreStorage(before);
@@ -444,6 +445,34 @@
     });
   }
 
+  function runPwaTests() {
+    test('PWA: index references manifest', () => {
+      const html = readText('index.html');
+      assertIncludes(html, 'rel="manifest"', 'index should reference manifest');
+      assertIncludes(html, 'manifest.json', 'index should include manifest path');
+    });
+    test('PWA: index registers service worker', () => {
+      const html = readText('index.html');
+      assertIncludes(html, 'serviceWorker', 'index should include service worker registration');
+      assertIncludes(html, './sw.js', 'index should register sw.js');
+    });
+    test('PWA: manifest has app name', () => {
+      const manifest = JSON.parse(readText('manifest.json'));
+      assertEqual(manifest.short_name, '懸賞管理', 'manifest short_name should match');
+      assertEqual(manifest.display, 'standalone', 'manifest display should be standalone');
+    });
+    test('PWA: service worker has cache name', () => {
+      const sw = readText('sw.js');
+      assertIncludes(sw, 'kensho-dashboard-v1.0.0', 'service worker should have versioned cache');
+      assertIncludes(sw, 'cache.addAll', 'service worker should precache assets');
+    });
+    test('PWA: icon files are reachable', () => {
+      ['icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'].forEach(path => {
+        assertTrue(resourceExists(path), `${path} should be reachable`);
+      });
+    });
+  }
+
   function runBrokenLocalStorageTests() {
     test('Storage: broken localStorage recovers to empty array', () => {
       localStorage.setItem(STORAGE_KEY, '{broken json');
@@ -477,6 +506,21 @@
   function formatValue(value) {
     if (typeof value === 'string') return value;
     return JSON.stringify(value, null, 2);
+  }
+
+  function readText(path) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', path, false);
+    xhr.send(null);
+    if (xhr.status < 200 || xhr.status >= 300) fail(`${path} should be readable`, '2xx', xhr.status);
+    return xhr.responseText;
+  }
+
+  function resourceExists(path) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', path, false);
+    xhr.send(null);
+    return xhr.status >= 200 && xhr.status < 300;
   }
 
   document.getElementById('runTests').addEventListener('click', runAllTests);

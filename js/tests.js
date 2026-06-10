@@ -473,8 +473,29 @@
     });
     test('PWA: service worker has cache name', () => {
       const sw = readText('sw.js');
-      assertIncludes(sw, 'kensho-dashboard-v1.0.0', 'service worker should have versioned cache');
+      assertIncludes(sw, 'kensho-dashboard-v1.2.0', 'service worker should have versioned cache');
       assertIncludes(sw, 'cache.addAll', 'service worker should precache assets');
+    });
+    test('PWA: theme color meta exists', () => {
+      const html = readText('index.html');
+      assertIncludes(html, 'name="theme-color"', 'index should include theme color meta');
+      assertIncludes(html, '#2563eb', 'theme color should match manifest');
+    });
+    test('PWA: apple touch icon exists', () => {
+      const html = readText('index.html');
+      assertIncludes(html, 'rel="apple-touch-icon"', 'index should include apple touch icon');
+      assertIncludes(html, 'icons/apple-touch-icon.png', 'apple touch icon path should be relative');
+    });
+    test('PWA: manifest paths are relative', () => {
+      const manifest = JSON.parse(readText('manifest.json'));
+      assertEqual(manifest.start_url, './index.html', 'start_url should be relative');
+      assertEqual(manifest.scope, './', 'scope should be relative');
+      assertTrue(manifest.icons.every(icon => !/^https?:\/\//.test(icon.src)), 'icon paths should be relative');
+    });
+    test('PWA: service worker caches docs files', () => {
+      const sw = readText('sw.js');
+      assertIncludes(sw, './docs/DEPLOY.md', 'deploy guide should be cached');
+      assertIncludes(sw, './docs/BACKUP.md', 'backup guide should be cached');
     });
     test('PWA: icon files are reachable', () => {
       ['icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'].forEach(path => {

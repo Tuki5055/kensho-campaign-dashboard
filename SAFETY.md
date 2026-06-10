@@ -110,6 +110,7 @@ Service Workerは、`index.html`、CSS、JavaScript、manifest、アイコン、
 - 自動応募しません。
 - 通知はユーザーが明示的に許可した場合のみ使います。
 - 応募操作は引き続き人間が手動で行います。
+- localStorageデータは端末内保存のままで、Service WorkerやPWAによってクラウド同期されません。
 
 Service Workerのキャッシュにより画面更新が遅れる場合があります。サイトデータ削除を行う前にはJSONバックアップを取ってください。
 

@@ -2,6 +2,16 @@
 
 このプロジェクトの主な変更履歴です。
 
+## v1.2.0
+
+- PWA対応の仕上げ
+- `manifest.json` のアイコン定義を整理
+- Service Workerのキャッシュ名とキャッシュ対象を更新
+- docs主要ファイルをオフラインキャッシュ対象に追加
+- iPhone / Safari、Android / Chromeでのホーム画面追加手順を文書化
+- PWAキャッシュ更新時の注意をREADME、DEPLOY、BACKUP、SAFETYに追記
+- PWA関連テストを追加
+
 ## v1.1.0
 
 - 探索タブを追加

@@ -10,6 +10,7 @@
     K.UI.renderTabs();
     K.UI.renderToday();
     K.UI.renderList();
+    K.UI.renderDiscovery();
     K.UI.renderNew();
     K.UI.renderDetail();
     K.UI.renderHistory();

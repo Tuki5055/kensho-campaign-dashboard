@@ -143,6 +143,13 @@ textarea { min-height: 112px; resize: vertical; line-height: 1.6; }
   font-size: .9rem;
 }
 .check-pill input { width: auto; }
+.check-pill input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
 .stat-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 .stat {
   background: #fff;
@@ -264,10 +271,25 @@ tr.muted-row td { color: #667085; background: #fafafa; }
 .toast.show { opacity: 1; transform: translateY(0); }
 .split-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .suggested-tags { margin-top: 8px; }
+.discovery-presets { margin-bottom: 0; }
+.discovery-keyword { grid-template-columns: 1fr; }
+.candidate-preview { display: grid; gap: 12px; margin-top: 14px; }
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+  margin: 10px 0;
+  font-size: .9rem;
+  line-height: 1.6;
+}
+.duplicate-warning {
+  border-color: #f0c27a;
+  background: #fffaf0;
+}
 
 @media (max-width: 860px) {
   .app { width: min(100% - 18px, 1220px); padding-top: 14px; }
-  header, .two, .three, .detail-layout, .form-grid { grid-template-columns: 1fr; }
+  header, .two, .three, .detail-layout, .form-grid, .preview-grid { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .campaign { grid-template-columns: 1fr; }
   .score { text-align: left; }

@@ -3,6 +3,7 @@
 このアプリはキャンペーン配列をブラウザの localStorage に保存します。
 
 - localStorageキー: `kensho_campaign_dashboard_v1`
+- 探索履歴キー: `kensho_campaign_discovery_history_v1`
 - 保存形式: JSON配列
 - 1要素: キャンペーンオブジェクト
 - 正規化処理: `K.Storage.normalizeCampaign`
@@ -146,6 +147,26 @@ CSVはBOM付きUTF-8、CRLF改行で出力します。主な列は以下です�
 - ステータス
 - コメント案
 - メモ
+
+## 探索履歴データ
+
+探索履歴はキャンペーン本体とは別のlocalStorageキーに保存します。
+
+- localStorageキー: `kensho_campaign_discovery_history_v1`
+- 保存形式: JSON配列
+- 正規化処理: `K.Discovery.normalizeHistoryItem`
+
+| 項目 | 保存キー | 型 | 説明 | 初期値 |
+| --- | --- | --- | --- | --- |
+| id | `id` | string | 探索履歴ID。未指定なら自動生成。 | `crypto.randomUUID()` または代替ID |
+| 探索日時 | `createdAt` | string | 探索または登録操作の日時。ISO文字列。 | 現在日時 |
+| 使用キーワード | `keyword` | string | 生成・使用した検索キーワード。 | `""` |
+| 検索対象 | `targets` | string[] | `X`、`Instagram`、`Google検索`、`公式サイト`、`キャンペーンまとめサイト`。 | `[]` |
+| 開いた検索リンク | `openedLinks` | string[] | ユーザーが開いた検索リンクまたは取り込み元URL。http/httpsのみ保持。 | `[]` |
+| 登録件数 | `registeredCount` | number | 探索から登録した候補数。 | `0` |
+| メモ | `notes` | string | 探索履歴メモ。 | `""` |
+
+探索履歴JSONインポートは配列のみ受け付け、各要素を正規化します。探索履歴CSVはBOM付きUTF-8、CRLF改行で出力します。
 
 ## ICSエクスポート
 

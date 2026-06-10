@@ -3,7 +3,9 @@
 
   const K = window.Kensho;
   const STORAGE_KEY = K.STORAGE_KEY;
+  const DISCOVERY_HISTORY_KEY = K.DISCOVERY_HISTORY_KEY;
   const originalStorage = localStorage.getItem(STORAGE_KEY);
+  const originalDiscoveryHistory = localStorage.getItem(DISCOVERY_HISTORY_KEY);
   const results = [];
 
   window.AppTestUtils = {
@@ -83,6 +85,7 @@
   function runAllTests() {
     results.length = 0;
     const before = localStorage.getItem(STORAGE_KEY);
+    const beforeDiscovery = localStorage.getItem(DISCOVERY_HISTORY_KEY);
     try {
       runUrlTests();
       runDateTests();
@@ -96,9 +99,11 @@
       runApplicationHistoryTests();
       runReminderTests();
       runPwaTests();
+      runDiscoveryTests();
       runBrokenLocalStorageTests();
     } finally {
       restoreStorage(before);
+      restoreDiscoveryHistory(beforeDiscovery);
     }
     renderResults();
     console.table(results.map(r => ({ name: r.name, passed: r.passed, detail: r.detail })));
@@ -109,6 +114,11 @@
   function restoreStorage(value = originalStorage) {
     if (value === null || value === undefined) localStorage.removeItem(STORAGE_KEY);
     else localStorage.setItem(STORAGE_KEY, value);
+  }
+
+  function restoreDiscoveryHistory(value = originalDiscoveryHistory) {
+    if (value === null || value === undefined) localStorage.removeItem(DISCOVERY_HISTORY_KEY);
+    else localStorage.setItem(DISCOVERY_HISTORY_KEY, value);
   }
 
   function runUrlTests() {
@@ -470,6 +480,65 @@
       ['icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'].forEach(path => {
         assertTrue(resourceExists(path), `${path} should be reachable`);
       });
+    });
+  }
+
+  function runDiscoveryTests() {
+    test('Discovery: keywords are generated', () => {
+      const keywords = K.Discovery.buildDiscoveryKeywords(K.Discovery.defaultCriteria());
+      assertTrue(keywords.length > 0, 'keywords should be generated');
+    });
+    test('Discovery: Amazon gift card criteria appears in keywords', () => {
+      const keywords = K.Discovery.buildDiscoveryKeywords({ genres: ['Amazonギフト券'], targets: ['X'], conditions: ['フォロー', 'リポスト'], excludes: [] });
+      assertTrue(keywords.some(keyword => keyword.includes('Amazonギフト券')), 'keywords should include Amazon gift card');
+    });
+    test('Discovery: X search URL is generated', () => {
+      const url = K.Discovery.buildXSearchUrl('Amazonギフト券 プレゼント');
+      assertIncludes(url, 'https://x.com/search?q=', 'X search URL should be generated');
+      assertIncludes(url, 'f=live', 'X search URL should use live filter');
+    });
+    test('Discovery: Google search URL is generated', () => {
+      const url = K.Discovery.buildGoogleSearchUrl('QUOカード キャンペーン');
+      assertIncludes(url, 'https://www.google.com/search?q=', 'Google search URL should be generated');
+    });
+    test('Discovery: unsafe import URL is rejected by normalization', () => {
+      const candidate = K.Discovery.createCampaignCandidate({ url: 'javascript:alert(1)', body: 'Amazonギフト券をプレゼント。' });
+      assertEqual(candidate.url, '', 'unsafe URL should be blank');
+    });
+    test('Discovery: exact URL duplicate is detected', () => {
+      const existing = makeCampaign({ url: 'https://example.com/same-campaign' });
+      const candidate = makeCampaign({ url: 'https://example.com/same-campaign', title: '別タイトル' });
+      const duplicates = K.Discovery.detectDuplicateCampaign(candidate, [existing]);
+      assertTrue(duplicates.some(item => item.type === 'url'), 'exact URL duplicate should be detected');
+    });
+    test('Discovery: organizer prize deadline near duplicate is detected', () => {
+      const existing = makeCampaign({ organizer: '青空商店', prize: 'QUOカード', deadline: '2026-06-30', url: 'https://example.com/a' });
+      const candidate = makeCampaign({ organizer: '青空商店', prize: 'QUOカード', deadline: '2026-06-30', url: 'https://example.com/b' });
+      const duplicates = K.Discovery.detectDuplicateCampaign(candidate, [existing]);
+      assertTrue(duplicates.some(item => item.type === 'near'), 'near duplicate should be detected');
+    });
+    test('Discovery: history saves and loads', () => {
+      restoreDiscoveryHistory(null);
+      K.Discovery.saveDiscoveryHistory([{ keyword: 'PayPay プレゼント', targets: ['Google検索'], openedLinks: ['https://www.google.com/search?q=PayPay'], registeredCount: 1, notes: 'test' }]);
+      const history = K.Discovery.loadDiscoveryHistory();
+      assertEqual(history.length, 1, 'history should load one item');
+      assertEqual(history[0].keyword, 'PayPay プレゼント', 'keyword should be preserved');
+    });
+    test('Discovery: history export includes required fields', () => {
+      const item = K.Discovery.normalizeHistoryItem({ keyword: '食品 プレゼント', targets: ['X'], openedLinks: ['https://x.com/search?q=test'], registeredCount: 2, notes: 'memo' });
+      assertTrue(Object.prototype.hasOwnProperty.call(item, 'createdAt'), 'createdAt should exist');
+      assertTrue(Object.prototype.hasOwnProperty.call(item, 'keyword'), 'keyword should exist');
+      assertTrue(Object.prototype.hasOwnProperty.call(item, 'registeredCount'), 'registeredCount should exist');
+    });
+    test('Discovery: candidate preview data has risk and score', () => {
+      const candidate = K.Discovery.createCampaignCandidate({
+        url: 'https://example.com/candidate',
+        organizer: '公式テスト商店',
+        body: '抽選で10名様にAmazonギフト券をプレゼント。フォロー＆リポストで応募。締切は2026年6月30日。当選者にはDMで連絡します。キャンペーン規約あり。'
+      });
+      assertTrue(!!candidate.risk.level, 'risk should be calculated');
+      assertTrue(candidate.score > 0, 'score should be calculated');
+      assertTrue(candidate.tags.includes('Amazonギフト券'), 'tag suggestions should be included');
     });
   }
 

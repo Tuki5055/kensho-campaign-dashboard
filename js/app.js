@@ -4,6 +4,7 @@
   const K = window.Kensho = window.Kensho || {};
 
   K.STORAGE_KEY = 'kensho_campaign_dashboard_v1';
+  K.DISCOVERY_HISTORY_KEY = 'kensho_campaign_discovery_history_v1';
   K.CONDITION_OPTIONS = ['フォロー', 'リポスト', 'いいね', 'コメント', 'ハッシュタグ', '引用投稿', '会員登録', 'アンケート回答', '個人情報入力'];
   K.STATUS_OPTIONS = ['未確認', '応募候補', '応募済み', '見送り', '当選', '落選', '締切切れ'];
   K.RESULT_STATUS_OPTIONS = ['未確認', '連絡待ち', '当選', '落選', '発送待ち', '受取済み'];
@@ -12,6 +13,7 @@
   K.TABS = [
     ['today', '今日やること'],
     ['list', 'キャンペーン一覧'],
+    ['discovery', '探索'],
     ['new', '新規登録'],
     ['detail', '詳細・編集'],
     ['history', '応募履歴'],
@@ -28,6 +30,9 @@
     activeTab: 'today',
     selectedId: null,
     listFilters: null,
+    discoveryCriteria: null,
+    discoveryCandidate: null,
+    discoveryDraft: null,
     historyFilters: null,
     reminderFilter: 'all',
     reminderSortMode: 'date',

@@ -36,7 +36,7 @@
   };
 
   K.Export.exportCsv = function () {
-    const headers = ['追加日', '締切', '主催者', 'キャンペーン名', 'SNS種別', '賞品', '当選人数', 'URL', '応募条件', 'タグ', '応募日', '結果ステータス', '当選・落選連絡日', '発送日', '受取日', '確認予定日', '応募後メモ', '応募操作メモ', 'リスク判定', 'リスク理由', '応募優先度スコア', 'ステータス', 'コメント案', 'メモ'];
+    const headers = ['追加日', '締切', '主催者', 'キャンペーン名', 'SNS種別', '賞品', '当選人数', 'URL', '応募条件', 'タグ', '締切リマインダー有効', '締切リマインダー日数', '応募後フォローリマインダー有効', '応募日', '結果ステータス', '当選・落選連絡日', '発送日', '受取日', '確認予定日', '応募後メモ', '応募操作メモ', 'リスク判定', 'リスク理由', '応募優先度スコア', 'ステータス', 'コメント案', 'メモ'];
     const rows = K.state.campaigns.map(c => [
       c.createdAt,
       c.deadline,
@@ -48,6 +48,9 @@
       c.url,
       c.conditions.join(' / '),
       (c.tags || []).join(' / '),
+      c.reminderEnabled ? '有効' : '無効',
+      c.reminderDaysBefore,
+      c.followUpReminderEnabled ? '有効' : '無効',
       c.appliedAt,
       c.resultStatus,
       c.resultNotifiedAt,

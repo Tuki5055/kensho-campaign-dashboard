@@ -38,6 +38,9 @@
 | cautions | `cautions` | string | 本文解析やリスク判定で見つけた注意点。 | `""` |
 | tags | `tags` | string[] | タグ。文字列や不正値は正規化される。 | `[]` |
 | status | `status` | string | 管理ステータス。 | `"未確認"` |
+| reminderEnabled | `reminderEnabled` | boolean | 締切リマインダーを有効にするか。boolean以外はtrueへ補正。 | `true` |
+| reminderDaysBefore | `reminderDaysBefore` | number | 締切何日前からリマインダー対象にするか。許可値は1、3、7、14。 | `3` |
+| followUpReminderEnabled | `followUpReminderEnabled` | boolean | 応募後フォローリマインダーを有効にするか。boolean以外はtrueへ補正。 | `true` |
 | checklist | `checklist` | object | 手動応募チェックリストのチェック状態。キーはチェック項目名、値はboolean。 | `{}` |
 | risk | `risk` | object | リスク判定結果。`level` と `reasons` を含む。保存時・読込時に再計算。 | `{ level: "要確認", reasons: ["未判定"] }` |
 | score | `score` | number | 応募優先度スコア。保存時・読込時に再計算。 | `0` |
@@ -106,6 +109,9 @@
 - `url` は `http://` / `https://` のみ許可します。
 - `deadline` や履歴日付は `YYYY-MM-DD` のみ有効です。
 - `tags` は配列または文字列を許容し、配列へ正規化します。
+- `reminderEnabled` がbooleanでなければ `true` へ補正します。
+- `reminderDaysBefore` が1、3、7、14以外なら `3` へ補正します。
+- `followUpReminderEnabled` がbooleanでなければ `true` へ補正します。
 - 不正なステータスやSNS種別は既定値へ補正します。
 - 読み込み後にリスク、スコア、コメント案を再計算します。
 
@@ -123,6 +129,9 @@ CSVはBOM付きUTF-8、CRLF改行で出力します。主な列は以下です�
 - URL
 - 応募条件
 - タグ
+- 締切リマインダー有効
+- 締切リマインダー日数
+- 応募後フォローリマインダー有効
 - 応募日
 - 結果ステータス
 - 当選・落選連絡日
@@ -137,3 +146,12 @@ CSVはBOM付きUTF-8、CRLF改行で出力します。主な列は以下です�
 - ステータス
 - コメント案
 - メモ
+
+## ICSエクスポート
+
+ICSはカレンダー取り込み用の補助ファイルです。
+
+- 締切日があるキャンペーンは `【懸賞締切】キャンペーン名` の終日予定として出力します。
+- 確認予定日があるキャンペーンは `【懸賞確認】キャンペーン名` の終日予定として出力します。
+- 説明には主催者、賞品、URL、ステータス、リスク、メモを含めます。
+- ICSは復元用ではありません。復元にはJSONを使ってください。

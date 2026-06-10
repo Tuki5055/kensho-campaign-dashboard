@@ -41,6 +41,10 @@
           <div class="field full"><label>注意点</label><textarea name="cautions">${e(campaign.cautions || '')}</textarea></div>
           <div class="field full"><label>メモ</label><textarea name="notes">${e(campaign.notes)}</textarea></div>
           <div class="field"><label>ステータス</label><select name="status">${K.STATUS_OPTIONS.map(v => `<option ${campaign.status === v ? 'selected' : ''}>${e(v)}</option>`).join('')}</select></div>
+          <div class="field full"><h2>リマインダー設定</h2></div>
+          <div class="field full"><label class="check-row"><input type="checkbox" name="reminderEnabled" ${campaign.reminderEnabled ? 'checked' : ''}>締切リマインダーを有効にする</label></div>
+          <div class="field"><label>締切何日前から表示するか</label><select name="reminderDaysBefore">${K.Reminders.ALLOWED_DAYS_BEFORE.map(v => `<option value="${v}" ${campaign.reminderDaysBefore === v ? 'selected' : ''}>${v}日前</option>`).join('')}</select></div>
+          <div class="field full"><label class="check-row"><input type="checkbox" name="followUpReminderEnabled" ${campaign.followUpReminderEnabled ? 'checked' : ''}>応募後フォローリマインダーを有効にする</label></div>
           <div class="field full"><h2>応募履歴</h2></div>
           ${K.UI.field('応募日', 'appliedAt', campaign.appliedAt, 'date')}
           <div class="field"><label>結果ステータス</label><select name="resultStatus">${K.RESULT_STATUS_OPTIONS.map(v => `<option ${campaign.resultStatus === v ? 'selected' : ''}>${e(v)}</option>`).join('')}</select></div>
@@ -152,6 +156,9 @@
       cautions: String(fd.get('cautions') || '').trim(),
       tags: K.Tags.normalizeTags(String(fd.get('tags') || '')),
       status: K.STATUS_OPTIONS.includes(String(fd.get('status'))) ? String(fd.get('status')) : '未確認',
+      reminderEnabled: fd.has('reminderEnabled'),
+      reminderDaysBefore: K.Reminders.ALLOWED_DAYS_BEFORE.includes(Number(fd.get('reminderDaysBefore'))) ? Number(fd.get('reminderDaysBefore')) : 3,
+      followUpReminderEnabled: fd.has('followUpReminderEnabled'),
       appliedAt: K.isValidDateInput(String(fd.get('appliedAt') || '')) ? String(fd.get('appliedAt')) : '',
       resultStatus: K.RESULT_STATUS_OPTIONS.includes(String(fd.get('resultStatus'))) ? String(fd.get('resultStatus')) : '未確認',
       resultNotifiedAt: K.isValidDateInput(String(fd.get('resultNotifiedAt') || '')) ? String(fd.get('resultNotifiedAt')) : '',

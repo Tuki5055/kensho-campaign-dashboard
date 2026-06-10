@@ -15,6 +15,7 @@
     ['new', '新規登録'],
     ['detail', '詳細・編集'],
     ['history', '応募履歴'],
+    ['reminders', 'リマインダー'],
     ['comments', 'コメント案'],
     ['analytics', '分析・集計'],
     ['backup', 'バックアップ']
@@ -28,6 +29,8 @@
     selectedId: null,
     listFilters: null,
     historyFilters: null,
+    reminderFilter: 'all',
+    reminderSortMode: 'date',
     historySortMode: 'appliedDesc',
     sortMode: 'deadline'
   };

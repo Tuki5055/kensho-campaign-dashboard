@@ -23,6 +23,7 @@
       cautions: '',
       status: '未確認',
       ...K.History.defaultFields(),
+      ...K.Reminders.defaultFields(),
       checklist: {},
       risk: { level: '要確認', reasons: ['未判定'] },
       score: 0,
@@ -49,6 +50,7 @@
     merged.cautions = K.safeText(raw.cautions);
     merged.tags = K.Tags.normalizeTags(raw.tags);
     Object.assign(merged, K.History.normalizeHistoryFields(raw));
+    Object.assign(merged, K.Reminders.normalizeReminderFields(raw));
     merged.status = K.STATUS_OPTIONS.includes(raw.status) ? raw.status : '未確認';
     merged.conditions = Array.isArray(raw.conditions) ? raw.conditions.filter(v => K.CONDITION_OPTIONS.includes(v)) : [];
     merged.checklist = raw.checklist && typeof raw.checklist === 'object' && !Array.isArray(raw.checklist) ? raw.checklist : {};

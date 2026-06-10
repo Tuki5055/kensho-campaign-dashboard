@@ -94,6 +94,7 @@
       runTagAndFilterTests();
       runTagExportTests();
       runApplicationHistoryTests();
+      runReminderTests();
       runBrokenLocalStorageTests();
     } finally {
       restoreStorage(before);
@@ -371,6 +372,73 @@
         K.Export.download = originalDownload;
       }
       ['応募日', '結果ステータス', '当選・落選連絡日', '発送日', '受取日', '確認予定日', '応募後メモ', '応募操作メモ'].forEach(header => {
+        assertIncludes(captured, header, `${header} should be in CSV`);
+      });
+    });
+  }
+
+  function runReminderTests() {
+    const baseDate = new Date(2026, 5, 9);
+    test('Reminder: missing fields are filled', () => {
+      const c = K.Storage.normalizeCampaign({ title: 'リマインダーなし' });
+      assertEqual(c.reminderEnabled, true, 'reminderEnabled should default true');
+      assertEqual(c.reminderDaysBefore, 3, 'reminderDaysBefore should default 3');
+      assertEqual(c.followUpReminderEnabled, true, 'followUpReminderEnabled should default true');
+    });
+    test('Reminder: invalid reminderEnabled becomes true', () => {
+      assertEqual(K.Storage.normalizeCampaign({ title: 'x', reminderEnabled: 'yes' }).reminderEnabled, true, 'invalid reminderEnabled should normalize');
+    });
+    test('Reminder: invalid reminderDaysBefore becomes 3', () => {
+      assertEqual(K.Storage.normalizeCampaign({ title: 'x', reminderDaysBefore: 2 }).reminderDaysBefore, 3, 'invalid days should normalize');
+    });
+    test('Reminder: allowed reminderDaysBefore values are kept', () => {
+      [1, 3, 7, 14].forEach(days => {
+        assertEqual(K.Storage.normalizeCampaign({ title: 'x', reminderDaysBefore: days }).reminderDaysBefore, days, `${days} should remain`);
+      });
+    });
+    test('Reminder: invalid followUpReminderEnabled becomes true', () => {
+      assertEqual(K.Storage.normalizeCampaign({ title: 'x', followUpReminderEnabled: 'no' }).followUpReminderEnabled, true, 'invalid follow-up flag should normalize');
+    });
+    test('Reminder: today deadline is included', () => {
+      const reminders = K.Reminders.getDeadlineReminders([makeCampaign({ deadline: '2026-06-09', reminderDaysBefore: 3 })], baseDate);
+      assertEqual(reminders.length, 1, 'today deadline should be reminder');
+      assertEqual(reminders[0].label, '今日締切', 'label should be today deadline');
+    });
+    test('Reminder: within 3 days deadline is included', () => {
+      const reminders = K.Reminders.getDeadlineReminders([makeCampaign({ deadline: '2026-06-12', reminderDaysBefore: 3 })], baseDate);
+      assertEqual(reminders.length, 1, '3 days deadline should be reminder');
+    });
+    test('Reminder: disabled deadline reminder is excluded', () => {
+      const reminders = K.Reminders.getDeadlineReminders([makeCampaign({ deadline: '2026-06-09', reminderEnabled: false })], baseDate);
+      assertEqual(reminders.length, 0, 'disabled deadline reminder should be excluded');
+    });
+    test('Reminder: followUpDate today or past is included', () => {
+      const reminders = K.Reminders.getFollowUpReminders([makeCampaign({ appliedAt: '2026-06-01', status: '応募済み', resultStatus: '連絡待ち', followUpDate: '2026-06-08' })], baseDate);
+      assertTrue(reminders.some(item => item.type === 'followUp'), 'past follow-up should be included');
+    });
+    test('Reminder: disabled follow-up reminder is excluded', () => {
+      const reminders = K.Reminders.getFollowUpReminders([makeCampaign({ appliedAt: '2026-06-01', status: '応募済み', resultStatus: '連絡待ち', followUpDate: '2026-06-08', followUpReminderEnabled: false })], baseDate);
+      assertEqual(reminders.length, 0, 'disabled follow-up reminder should be excluded');
+    });
+    test('ICS: calendar includes BEGIN:VCALENDAR', () => {
+      const ics = K.Ics.buildIcsCalendar([makeCampaign({ title: 'ICSテスト', deadline: '2026-06-30' })]);
+      assertIncludes(ics, 'BEGIN:VCALENDAR', 'ICS should include calendar header');
+    });
+    test('ICS: calendar includes campaign title', () => {
+      const ics = K.Ics.buildIcsCalendar([makeCampaign({ title: 'ICSテスト', deadline: '2026-06-30' })]);
+      assertIncludes(ics, 'ICSテスト', 'ICS should include title');
+    });
+    test('Export: CSV includes reminder columns', () => {
+      let captured = '';
+      const originalDownload = K.Export.download;
+      K.state.campaigns = [makeCampaign({ reminderEnabled: true, reminderDaysBefore: 7, followUpReminderEnabled: false })];
+      K.Export.download = (filename, content) => { captured = content; };
+      try {
+        K.Export.exportCsv();
+      } finally {
+        K.Export.download = originalDownload;
+      }
+      ['締切リマインダー有効', '締切リマインダー日数', '応募後フォローリマインダー有効'].forEach(header => {
         assertIncludes(captured, header, `${header} should be in CSV`);
       });
     });

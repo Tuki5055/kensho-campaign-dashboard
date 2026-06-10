@@ -13,6 +13,7 @@
     K.UI.renderNew();
     K.UI.renderDetail();
     K.UI.renderHistory();
+    K.UI.renderReminders();
     K.UI.renderComments();
     K.UI.renderAnalytics();
     K.UI.renderBackup();

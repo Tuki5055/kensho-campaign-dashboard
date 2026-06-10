@@ -14,6 +14,7 @@
           <button class="secondary" id="exportJson">JSONエクスポート</button>
           <label class="check-pill">JSONインポート<input type="file" id="importJson" accept="application/json,.json"></label>
           <button class="secondary" id="exportCsv">CSVエクスポート</button>
+          <button class="secondary" id="exportIcs">全リマインダーをICS出力</button>
           <button class="danger" id="clearAll">全データ削除</button>
         </div>
         <p class="small">localStorageに保存します。JSONインポート時は最低限の型チェックを行い、不正な形式は読み込みません。</p>
@@ -21,6 +22,7 @@
     document.getElementById('sample').addEventListener('click', K.SampleData.install);
     document.getElementById('exportJson').addEventListener('click', K.Export.exportJson);
     document.getElementById('exportCsv').addEventListener('click', K.Export.exportCsv);
+    document.getElementById('exportIcs').addEventListener('click', () => K.Ics.downloadIcs(K.state.campaigns));
     document.getElementById('importJson').addEventListener('change', K.Export.importJson);
     document.getElementById('clearAll').addEventListener('click', () => {
       if (confirm('全データを削除しますか？')) {

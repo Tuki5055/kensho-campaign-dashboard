@@ -148,6 +148,14 @@ git push -u origin main
 https://ユーザー名.github.io/リポジトリ名/
 ```
 
+このリポジトリでの公開URL見込み:
+
+```text
+https://tuki5055.github.io/kensho-campaign-dashboard/
+```
+
+TODO: GitHub Pagesを有効化して公開URLが確定したら、このURLが正しく開けることを確認してください。
+
 テスト画面:
 
 ```text

@@ -184,6 +184,16 @@
       assertEqual(risk.level, '要確認', 'missing organizer should be review');
       assertIncludes(risk.reasons, '主催者', 'reason should mention organizer');
     });
+    test('Risk: free shipping does not become not recommended', () => {
+      const risk = K.Risk.evaluateRisk(makeCampaign({ body: '公式キャンペーン規約あり。送料無料で賞品を発送します。LINE登録で詳細を確認してください。' }));
+      assertEqual(risk.level, '要確認', 'free shipping with LINE should remain review, not clear danger');
+      assertIncludes(risk.reasons, 'LINE登録', 'reason should mention LINE');
+    });
+    test('Risk: official iPhone prize requires review but is not automatically rejected', () => {
+      const risk = K.Risk.evaluateRisk(makeCampaign({ body: '公式キャンペーン規約あり。抽選でiPhoneをプレゼントします。フォローとリポストで応募。' }));
+      assertEqual(risk.level, '要確認', 'official high value prize should require review');
+      assertIncludes(risk.reasons, '高額', 'reason should mention high value');
+    });
   }
 
   function runScoreTests() {
@@ -473,8 +483,13 @@
     });
     test('PWA: service worker has cache name', () => {
       const sw = readText('sw.js');
-      assertIncludes(sw, 'kensho-dashboard-v1.2.0', 'service worker should have versioned cache');
+      assertIncludes(sw, 'kensho-dashboard-v1.3.0', 'service worker should have versioned cache');
       assertIncludes(sw, 'cache.addAll', 'service worker should precache assets');
+    });
+    test('PWA: service worker uses update-friendly strategies', () => {
+      const sw = readText('sw.js');
+      assertIncludes(sw, 'networkFirst', 'service worker should use network first for navigation');
+      assertIncludes(sw, 'staleWhileRevalidate', 'service worker should refresh cached assets');
     });
     test('PWA: theme color meta exists', () => {
       const html = readText('index.html');

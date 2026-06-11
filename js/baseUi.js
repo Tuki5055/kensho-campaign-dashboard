@@ -95,12 +95,12 @@
     return entries.map(([key, value]) => `<div class="meta" style="justify-content:space-between"><span>${e(key)}</span><b>${value}</b></div>`).join('');
   };
 
-  K.UI.bindCampaignButtons = function () {
-    document.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => {
+  K.UI.bindCampaignButtons = function (root = document) {
+    root.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => {
       K.state.selectedId = btn.dataset.edit;
       K.UI.switchTab('detail');
     }));
-    document.querySelectorAll('[data-status]').forEach(btn => btn.addEventListener('click', () => K.updateStatus(btn.dataset.status, btn.dataset.value)));
-    document.querySelectorAll('[data-copy-comment]').forEach(btn => btn.addEventListener('click', () => K.Comments.copyFirstComment(btn.dataset.copyComment)));
+    root.querySelectorAll('[data-status]').forEach(btn => btn.addEventListener('click', () => K.updateStatus(btn.dataset.status, btn.dataset.value)));
+    root.querySelectorAll('[data-copy-comment]').forEach(btn => btn.addEventListener('click', () => K.Comments.copyFirstComment(btn.dataset.copyComment)));
   };
 })();

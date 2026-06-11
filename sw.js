@@ -1,5 +1,5 @@
-const CACHE_NAME = 'kensho-dashboard-v1.2.0';
-const APP_ASSET_VERSION = '20260611-discovery-simple';
+const CACHE_NAME = 'kensho-dashboard-v1.3.0';
+const APP_ASSET_VERSION = '20260611-core-fixes';
 const withVersion = path => `${path}?v=${APP_ASSET_VERSION}`;
 
 const ASSETS = [
@@ -68,18 +68,32 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET' || requestUrl.origin !== self.location.origin) return;
   const matchOptions = requestUrl.search ? {} : { ignoreSearch: true };
 
-  event.respondWith(
-    caches.match(event.request, matchOptions).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (!response || response.status !== 200 || response.type !== 'basic') return response;
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        return response;
-      }).catch(() => {
-        if (event.request.mode === 'navigate') return caches.match('./index.html', { ignoreSearch: true });
-        return caches.match(event.request, matchOptions);
-      });
-    })
-  );
+  if (event.request.mode === 'navigate') {
+    event.respondWith(networkFirst(event.request, matchOptions));
+    return;
+  }
+
+  event.respondWith(staleWhileRevalidate(event.request, matchOptions));
 });
+
+function networkFirst(request, matchOptions) {
+  return fetch(request)
+    .then(response => cacheResponse(request, response))
+    .catch(() => caches.match(request, matchOptions).then(cached => cached || caches.match('./index.html', { ignoreSearch: true })));
+}
+
+function staleWhileRevalidate(request, matchOptions) {
+  return caches.match(request, matchOptions).then(cached => {
+    const fresh = fetch(request)
+      .then(response => cacheResponse(request, response))
+      .catch(() => cached);
+    return cached || fresh;
+  });
+}
+
+function cacheResponse(request, response) {
+  if (!response || response.status !== 200 || response.type !== 'basic') return response;
+  const clone = response.clone();
+  caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+  return response;
+}

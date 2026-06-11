@@ -9,10 +9,7 @@
 
   K.UI.renderList = function () {
     if (!K.state.listFilters) K.state.listFilters = K.Filter.defaultState();
-    const filtered = K.Filter.applyFilters(K.state.campaigns, K.state.listFilters);
-    const list = K.Filter.sortCampaigns(filtered, K.state.sortMode);
     const allTags = K.Tags.getAllTags(K.state.campaigns);
-    const activeFilters = K.Filter.describeActiveFilters(K.state.listFilters);
     document.getElementById('view-list').innerHTML = `
       <section class="panel">
         <h2>キャンペーン一覧</h2>
@@ -30,45 +27,74 @@
           </select>
           <button class="secondary" id="clearFilters">フィルター解除</button>
         </div>
-        <div class="small">全${K.state.campaigns.length}件中 ${list.length}件を表示</div>
-        <div class="active-filters">
-          ${activeFilters.length ? activeFilters.map(v => `<span class="badge blue">${e(v)}</span>`).join('') : '<span class="badge gray">フィルターなし</span>'}
-        </div>
         ${K.UI.filterPanel(allTags)}
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>ステータス</th><th>締切</th><th>主催者</th><th>キャンペーン名</th><th>SNS</th><th>賞品</th><th>条件</th><th>タグ</th><th>リスク</th><th>スコア</th><th>URL</th><th>メモ</th><th>操作</th></tr></thead>
-            <tbody>
-              ${list.map(c => `
-                <tr class="${['応募済み', '見送り'].includes(K.effectiveStatus(c)) ? 'muted-row' : ''}">
-                  <td><select class="status-select" data-status-select="${a(c.id)}">${K.STATUS_OPTIONS.map(s => `<option ${c.status === s ? 'selected' : ''}>${e(s)}</option>`).join('')}</select><div class="small">表示: ${e(K.effectiveStatus(c))}</div></td>
-                  <td>${e(K.formatDeadline(c))}</td>
-                  <td>${e(c.organizer)}</td>
-                  <td>${e(c.title)}</td>
-                  <td>${e(c.snsType)}</td>
-                  <td>${e(c.prize)}</td>
-                  <td>${e(c.conditions.join('、'))}</td>
-                  <td>${K.UI.tagChips(c.tags || [])}</td>
-                  <td><span class="badge ${K.UI.riskClass(c.risk.level)}">${e(c.risk.level)}</span><div class="small">${e(c.risk.reasons.join(' / '))}</div></td>
-                  <td><b>${c.score}</b></td>
-                  <td>${K.isSafeUrl(c.url) ? `<a href="${a(c.url)}" target="_blank" rel="noopener noreferrer">開く</a>` : '<span class="small">未設定</span>'}</td>
-                  <td>${e(c.notes)}</td>
-                  <td>${K.UI.campaignActions(c)}</td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-        ${list.length ? '' : '<div class="empty" style="margin-top:12px">条件に合うキャンペーンがありません。</div>'}
+        <div id="listResults">${K.UI.listResultsHtml()}</div>
       </section>`;
     const sort = document.getElementById('sortMode');
     sort.value = K.state.sortMode;
-    sort.addEventListener('change', event => { K.state.sortMode = event.target.value; K.UI.render(); });
-    document.getElementById('keywordSearch').addEventListener('input', event => { K.state.listFilters.keyword = event.target.value; K.UI.render(); });
+    sort.addEventListener('change', event => {
+      K.state.sortMode = event.target.value;
+      K.UI.renderListResults();
+    });
+    document.getElementById('keywordSearch').addEventListener('input', event => {
+      K.state.listFilters.keyword = event.target.value;
+      clearTimeout(K.state.listSearchTimer);
+      K.state.listSearchTimer = setTimeout(K.UI.renderListResults, 120);
+    });
     document.getElementById('clearFilters').addEventListener('click', () => { K.state.listFilters = K.Filter.defaultState(); K.UI.render(); });
     document.querySelectorAll('[data-filter-group]').forEach(input => input.addEventListener('change', () => K.UI.updateFilterSet(input)));
     document.querySelectorAll('[data-tag-filter]').forEach(btn => btn.addEventListener('click', () => K.UI.toggleTagFilter(btn.dataset.tagFilter)));
-    document.querySelectorAll('[data-status-select]').forEach(select => select.addEventListener('change', () => K.updateStatus(select.dataset.statusSelect, select.value)));
-    K.UI.bindCampaignButtons();
+    K.UI.bindListResultButtons();
+  };
+
+  K.UI.listResultsHtml = function () {
+    const filtered = K.Filter.applyFilters(K.state.campaigns, K.state.listFilters);
+    const list = K.Filter.sortCampaigns(filtered, K.state.sortMode);
+    const activeFilters = K.Filter.describeActiveFilters(K.state.listFilters);
+    return `
+      <div class="small">全${K.state.campaigns.length}件中 ${list.length}件を表示</div>
+      <div class="active-filters">
+        ${activeFilters.length ? activeFilters.map(v => `<span class="badge blue">${e(v)}</span>`).join('') : '<span class="badge gray">フィルターなし</span>'}
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ステータス</th><th>締切</th><th>主催者</th><th>キャンペーン名</th><th>SNS</th><th>賞品</th><th>条件</th><th>タグ</th><th>リスク</th><th>スコア</th><th>URL</th><th>メモ</th><th>操作</th></tr></thead>
+          <tbody>
+            ${list.map(c => `
+              <tr class="${['応募済み', '見送り'].includes(K.effectiveStatus(c)) ? 'muted-row' : ''}">
+                <td><select class="status-select" data-status-select="${a(c.id)}" aria-label="${a(c.title || 'キャンペーン')}のステータス">${K.STATUS_OPTIONS.map(s => `<option ${c.status === s ? 'selected' : ''}>${e(s)}</option>`).join('')}</select><div class="small">表示: ${e(K.effectiveStatus(c))}</div></td>
+                <td>${e(K.formatDeadline(c))}</td>
+                <td>${e(c.organizer)}</td>
+                <td>${e(c.title)}</td>
+                <td>${e(c.snsType)}</td>
+                <td>${e(c.prize)}</td>
+                <td>${e(c.conditions.join('、'))}</td>
+                <td>${K.UI.tagChips(c.tags || [])}</td>
+                <td><span class="badge ${K.UI.riskClass(c.risk.level)}">${e(c.risk.level)}</span><div class="small">${e(c.risk.reasons.join(' / '))}</div></td>
+                <td><b>${c.score}</b></td>
+                <td>${K.isSafeUrl(c.url) ? `<a href="${a(c.url)}" target="_blank" rel="noopener noreferrer">開く</a>` : '<span class="small">未設定</span>'}</td>
+                <td>${e(c.notes)}</td>
+                <td>${K.UI.campaignActions(c)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      ${list.length ? '' : '<div class="empty" style="margin-top:12px">条件に合うキャンペーンがありません。</div>'}`;
+  };
+
+  K.UI.renderListResults = function () {
+    const results = document.getElementById('listResults');
+    if (!results) return;
+    results.innerHTML = K.UI.listResultsHtml();
+    K.UI.bindListResultButtons();
+  };
+
+  K.UI.bindListResultButtons = function () {
+    const results = document.getElementById('listResults');
+    if (!results) return;
+    results.querySelectorAll('[data-tag-filter]').forEach(btn => btn.addEventListener('click', () => K.UI.toggleTagFilter(btn.dataset.tagFilter)));
+    results.querySelectorAll('[data-status-select]').forEach(select => select.addEventListener('change', () => K.updateStatus(select.dataset.statusSelect, select.value)));
+    K.UI.bindCampaignButtons(results);
   };
 
   K.UI.filterPanel = function (allTags) {

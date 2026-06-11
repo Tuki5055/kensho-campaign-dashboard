@@ -19,7 +19,7 @@
     if (campaign.conditions.includes('会員登録')) score -= 10;
     if (campaign.conditions.includes('個人情報入力')) score -= 20;
     if (K.REVIEW_PATTERN.test(`${campaign.body} ${campaign.url} ${campaign.cautions}`)) score -= 12;
-    if (/(送料|手数料|先払い|前払い|登録料|銀行口座|クレジットカード)/.test(`${campaign.body} ${campaign.cautions}`)) score -= 35;
+    if (/(送料負担|送料(?!\s*(?:は|が|も)?無料|無料)|配送料(?!\s*(?:は|が|も)?無料|無料)|手数料|先払い|前払い|登録料|銀行口座|クレジットカード)/.test(`${campaign.body} ${campaign.cautions}`)) score -= 35;
     if (campaign.conditions.length <= 3) score += 8;
     if (campaign.conditions.length >= 6) score -= 10;
 

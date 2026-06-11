@@ -46,7 +46,7 @@
 
   K.Parser.detectCautions = function (text) {
     const cautions = [];
-    K.Risk.DANGER_PATTERNS.forEach(([reason, pattern]) => {
+    K.Risk.DANGER_PATTERNS.forEach(({ reason, pattern }) => {
       if (pattern.test(text)) cautions.push(reason);
     });
     if (/(100万円|現金10万円|高級車|海外旅行|iPhone|MacBook)/.test(text)) cautions.push('高額すぎる賞品の可能性');

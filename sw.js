@@ -1,5 +1,5 @@
-const CACHE_NAME = 'kensho-dashboard-v1.3.1';
-const APP_ASSET_VERSION = '20260611-instagram-discovery';
+const CACHE_NAME = 'kensho-dashboard-v1.3.2';
+const APP_ASSET_VERSION = '20260611-history-wrap';
 const withVersion = path => `${path}?v=${APP_ASSET_VERSION}`;
 
 const ASSETS = [

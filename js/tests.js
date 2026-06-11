@@ -483,7 +483,7 @@
     });
     test('PWA: service worker has cache name', () => {
       const sw = readText('sw.js');
-      assertIncludes(sw, 'kensho-dashboard-v1.3.1', 'service worker should have versioned cache');
+      assertIncludes(sw, 'kensho-dashboard-v1.3.2', 'service worker should have versioned cache');
       assertIncludes(sw, 'cache.addAll', 'service worker should precache assets');
     });
     test('PWA: service worker uses update-friendly strategies', () => {
@@ -545,6 +545,14 @@
       const html = K.UI.discoveryKeywordCard('site:instagram.com プレゼントキャンペーン ハッシュタグ', { targets: ['Instagram'] });
       assertIncludes(html, 'Instagram用コピー', 'Instagram copy action should be visible');
       assertFalse(html.includes('Xで探す'), 'X action should not show for Instagram-only criteria');
+    });
+    test('Discovery UI: history links are shortened and constrained', () => {
+      const longUrl = `https://x.com/search?q=${'campaign'.repeat(40)}`;
+      const html = K.UI.discoveryHistoryLinksHtml([longUrl]);
+      const label = K.UI.discoveryHistoryLinkLabel(longUrl);
+      assertIncludes(html, 'history-link', 'history link class should be present');
+      assertIncludes(html, 'title="https://x.com/search', 'full URL should remain available in title');
+      assertFalse(label.includes('campaign'.repeat(20)), 'long query should not be rendered inline');
     });
     test('Discovery: unsafe import URL is rejected by normalization', () => {
       const candidate = K.Discovery.createCampaignCandidate({ url: 'javascript:alert(1)', body: 'Amazonギフト券をプレゼント。' });

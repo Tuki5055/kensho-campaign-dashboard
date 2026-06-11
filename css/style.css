@@ -164,12 +164,14 @@ textarea { min-height: 112px; resize: vertical; line-height: 1.6; }
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
+  min-width: 0;
   border: 1px solid var(--line);
   border-left: 5px solid var(--blue);
   border-radius: var(--radius);
   background: #fff;
   padding: 13px;
 }
+.campaign > * { min-width: 0; }
 .campaign.done,
 .campaign.skipped { opacity: .68; border-left-color: #98a2b3; background: #fafafa; }
 .campaign.risk-low { border-left-color: var(--green); }
@@ -328,6 +330,20 @@ tr.muted-row td { color: #667085; background: #fafafa; }
 .discovery-keyword { grid-template-columns: 1fr; }
 .discovery-keyword h3 { margin-bottom: 0; }
 .discovery-actions { margin-top: 9px; }
+.history-link-list {
+  display: grid;
+  gap: 4px;
+  margin-top: 7px;
+  max-width: 100%;
+}
+.history-link {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: normal;
+}
 .candidate-preview { display: grid; gap: 12px; margin-top: 14px; }
 .preview-grid {
   display: grid;

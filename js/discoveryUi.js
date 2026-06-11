@@ -221,9 +221,31 @@
                 <span class="badge low">登録 ${e(item.registeredCount)}件</span>
               </div>
               <p class="small">${e(item.notes || 'メモなし')}</p>
-              <p class="small">${e(item.openedLinks.join(' / '))}</p>
+              ${K.UI.discoveryHistoryLinksHtml(item.openedLinks)}
             </div>
           </article>`).join('')}
+      </div>`;
+  };
+
+  K.UI.discoveryHistoryLinkLabel = function (url) {
+    try {
+      const parsed = new URL(url);
+      const path = `${parsed.pathname}${parsed.search ? '…' : ''}`;
+      return K.safeText(`${parsed.hostname}${path}`, 84);
+    } catch (error) {
+      return K.safeText(url, 84);
+    }
+  };
+
+  K.UI.discoveryHistoryLinksHtml = function (links) {
+    const safeLinks = (Array.isArray(links) ? links : []).filter(K.isSafeUrl);
+    if (!safeLinks.length) return '';
+    return `
+      <div class="history-link-list" aria-label="開いた検索リンク">
+        ${safeLinks.map(url => `
+          <a class="history-link" href="${a(url)}" target="_blank" rel="noopener noreferrer" title="${a(url)}">
+            ${e(K.UI.discoveryHistoryLinkLabel(url))}
+          </a>`).join('')}
       </div>`;
   };
 

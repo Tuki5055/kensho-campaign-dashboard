@@ -14,35 +14,51 @@
     const duplicates = candidate ? K.Discovery.detectDuplicateCampaign(candidate, K.state.campaigns) : [];
     const history = K.Discovery.loadDiscoveryHistory().slice(0, 10);
     document.getElementById('view-discovery').innerHTML = `
-      <section class="panel grid">
-        <div class="section-title">
-          <div>
-            <h2>探索エージェント</h2>
-            <p class="small">検索キーワードと検索リンクを作り、見つけた投稿を手動で取り込みます。SNS操作や応募操作は自動化しません。</p>
-          </div>
+      <section class="panel discovery-hero">
+        <div>
+          <p class="small">キャンペーンを探す</p>
+          <h2>プリセットを選んで、検索リンクを開くだけ</h2>
+          <p class="small">見つけた投稿は下の貼り付け欄で登録候補にできます。SNS操作や応募操作は自動化しません。</p>
         </div>
+        <div class="discovery-steps">
+          <div><b>1</b><span>探し方を選ぶ</span></div>
+          <div><b>2</b><span>検索を開く</span></div>
+          <div><b>3</b><span>投稿を貼る</span></div>
+        </div>
+      </section>
+      <section class="panel grid">
+        <h2>よく使う探し方</h2>
         ${K.UI.discoveryPresetHtml()}
-        <form id="discoveryCriteriaForm" class="filter-panel">
-          <div class="filter-grid">
-            ${K.UI.discoveryCheckGroup('賞品ジャンル', 'genres', K.Discovery.GENRES, criteria.genres)}
-            ${K.UI.discoveryCheckGroup('SNS / 検索対象', 'targets', K.Discovery.TARGETS, criteria.targets)}
-            ${K.UI.discoveryCheckGroup('応募条件', 'conditions', K.Discovery.CONDITIONS, criteria.conditions)}
-            ${K.UI.discoveryCheckGroup('除外条件', 'excludes', K.Discovery.EXCLUDES, criteria.excludes)}
-          </div>
-          <div class="split-actions">
-            <button type="submit">キーワードを生成</button>
-            <button type="button" class="secondary" id="clearDiscoveryCriteria">条件をリセット</button>
-          </div>
-        </form>
+        <details class="filter-panel discovery-advanced">
+          <summary>こだわって条件を変える</summary>
+          <form id="discoveryCriteriaForm">
+            <div class="filter-grid">
+              ${K.UI.discoveryCheckGroup('賞品ジャンル', 'genres', K.Discovery.GENRES, criteria.genres)}
+              ${K.UI.discoveryCheckGroup('検索する場所', 'targets', K.Discovery.TARGETS, criteria.targets)}
+              ${K.UI.discoveryCheckGroup('応募条件', 'conditions', K.Discovery.CONDITIONS, criteria.conditions)}
+              ${K.UI.discoveryCheckGroup('避けたい条件', 'excludes', K.Discovery.EXCLUDES, criteria.excludes)}
+            </div>
+            <div class="split-actions">
+              <button type="submit">この条件で探す</button>
+              <button type="button" class="secondary" id="clearDiscoveryCriteria">リセット</button>
+            </div>
+          </form>
+        </details>
       </section>
       <section class="panel">
-        <h2>検索キーワード候補</h2>
+        <div class="section-title">
+          <div>
+            <h2>おすすめ検索</h2>
+            <p class="small">押すと検索ページを新しいタブで開きます。Instagramはコピーして手動検索してください。</p>
+          </div>
+        </div>
         ${K.UI.discoveryKeywordsHtml(keywords, criteria)}
       </section>
       <section class="panel">
-        <h2>候補取り込み</h2>
+        <h2>見つけた投稿を貼り付ける</h2>
+        <p class="small">URLと本文だけでもOKです。登録前にリスク・スコア・タグを確認できます。</p>
         ${K.UI.discoveryImportFormHtml()}
-        <div id="candidatePreview">${candidate ? K.UI.discoveryCandidatePreviewHtml(candidate, duplicates) : '<div class="empty">投稿URLと本文を貼り付けて「登録候補を作成」を押してください。</div>'}</div>
+        <div id="candidatePreview">${candidate ? K.UI.discoveryCandidatePreviewHtml(candidate, duplicates) : '<div class="empty">まだ登録候補はありません。見つけた投稿を貼って「プレビューする」を押してください。</div>'}</div>
       </section>
       <section class="panel">
         <div class="section-title">
@@ -60,9 +76,19 @@
   };
 
   K.UI.discoveryPresetHtml = function () {
+    const descriptions = {
+      easy: 'ギフト券やPayPay中心。まず迷ったらこれ。',
+      daily: '食品・日用品の公式っぽい案件を探す。',
+      safe: 'LINE登録、送料、手数料などを避けたい時。',
+      comment: 'コメント応募やハッシュタグ投稿向け。'
+    };
     return `
-      <div class="toolbar discovery-presets">
-        ${Object.entries(K.Discovery.PRESETS).map(([key, preset]) => `<button type="button" class="secondary tiny" data-discovery-preset="${a(key)}">${e(preset.label)}</button>`).join('')}
+      <div class="discovery-preset-grid">
+        ${Object.entries(K.Discovery.PRESETS).map(([key, preset]) => `
+          <button type="button" class="discovery-preset" data-discovery-preset="${a(key)}">
+            <span>${e(preset.label)}</span>
+            <small>${e(descriptions[key] || '')}</small>
+          </button>`).join('')}
       </div>`;
   };
 
@@ -79,25 +105,36 @@
 
   K.UI.discoveryKeywordsHtml = function (keywords, criteria) {
     if (!keywords.length) return '<div class="empty">条件を選ぶとキーワード候補が表示されます。</div>';
+    const primary = keywords.slice(0, 5);
+    const rest = keywords.slice(5);
     return `
       <div class="campaign-list">
-        ${keywords.map(keyword => {
-          const xUrl = K.Discovery.buildXSearchUrl(keyword);
-          const googleUrl = K.Discovery.buildGoogleSearchUrl(keyword);
-          return `
-            <article class="campaign discovery-keyword">
-              <div>
-                <h3>${e(keyword)}</h3>
-                <p class="small">Instagramではこのキーワードをコピーして、アプリやブラウザ上で手動検索してください。</p>
-                <div class="action-grid">
-                  ${criteria.targets.includes('X') ? `<a href="${a(xUrl)}" target="_blank" rel="noopener noreferrer" data-discovery-open="${a(keyword)}" data-discovery-url="${a(xUrl)}">X検索を開く</a>` : ''}
-                  ${criteria.targets.includes('Google検索') || criteria.targets.includes('公式サイト') || criteria.targets.includes('キャンペーンまとめサイト') ? `<a href="${a(googleUrl)}" target="_blank" rel="noopener noreferrer" data-discovery-open="${a(keyword)}" data-discovery-url="${a(googleUrl)}">Google検索を開く</a>` : ''}
-                  <button type="button" class="secondary tiny" data-copy-keyword="${a(keyword)}">キーワードをコピー</button>
-                </div>
-              </div>
-            </article>`;
-        }).join('')}
-      </div>`;
+        ${primary.map(keyword => K.UI.discoveryKeywordCard(keyword, criteria)).join('')}
+      </div>
+      ${rest.length ? `
+        <details class="discovery-more">
+          <summary>ほかの候補も見る（${rest.length}件）</summary>
+          <div class="campaign-list">
+            ${rest.map(keyword => K.UI.discoveryKeywordCard(keyword, criteria)).join('')}
+          </div>
+        </details>` : ''}`;
+  };
+
+  K.UI.discoveryKeywordCard = function (keyword, criteria) {
+    const xUrl = K.Discovery.buildXSearchUrl(keyword);
+    const googleUrl = K.Discovery.buildGoogleSearchUrl(keyword);
+    const canGoogle = criteria.targets.includes('Google検索') || criteria.targets.includes('公式サイト') || criteria.targets.includes('キャンペーンまとめサイト');
+    return `
+      <article class="campaign discovery-keyword">
+        <div>
+          <h3>${e(keyword)}</h3>
+          <div class="action-grid discovery-actions">
+            ${criteria.targets.includes('X') ? `<a href="${a(xUrl)}" target="_blank" rel="noopener noreferrer" data-discovery-open="${a(keyword)}" data-discovery-url="${a(xUrl)}">Xで探す</a>` : ''}
+            ${canGoogle ? `<a href="${a(googleUrl)}" target="_blank" rel="noopener noreferrer" data-discovery-open="${a(keyword)}" data-discovery-url="${a(googleUrl)}">Googleで探す</a>` : ''}
+            <button type="button" class="secondary tiny" data-copy-keyword="${a(keyword)}">コピー</button>
+          </div>
+        </div>
+      </article>`;
   };
 
   K.UI.discoveryImportFormHtml = function () {
@@ -107,13 +144,13 @@
         <div class="form-grid">
           ${K.UI.field('投稿URL', 'url', draft.url || '', 'url')}
           <div class="field"><label>SNS種別</label><select name="snsType">${K.SNS_OPTIONS.map(v => `<option ${((draft.snsType || 'X') === v) ? 'selected' : ''}>${e(v)}</option>`).join('')}</select></div>
-          ${K.UI.field('主催者名', 'organizer', draft.organizer || '')}
-          <div class="field full"><label>キャンペーン本文</label><textarea name="body" placeholder="見つけた投稿本文やキャンペーン説明を貼り付けます">${e(draft.body || '')}</textarea></div>
+          <div class="field full"><label>投稿本文・キャンペーン説明</label><textarea name="body" placeholder="ここに投稿本文を貼り付けます">${e(draft.body || '')}</textarea></div>
+          ${K.UI.field('主催者名（分かれば）', 'organizer', draft.organizer || '')}
           <div class="field full"><label>メモ</label><textarea name="notes" placeholder="検索元や確認したい点をメモできます">${e(draft.notes || '')}</textarea></div>
         </div>
         <div class="split-actions">
-          <button type="submit">登録候補を作成</button>
-          <button type="button" class="secondary" id="parseDiscoveryBody">本文解析</button>
+          <button type="submit">プレビューする</button>
+          <button type="button" class="secondary" id="parseDiscoveryBody">解析だけする</button>
           <span class="small">登録ボタンを押すまでlocalStorageには保存しません。</span>
         </div>
       </form>`;
@@ -144,7 +181,7 @@
             </div>
             ${K.UI.tagChips(candidate.tags || [])}
             <div class="action-grid">
-              <button type="button" data-register-candidate>登録する</button>
+              <button type="button" data-register-candidate>この内容で登録</button>
               ${duplicates[0] ? `<button type="button" class="secondary tiny" data-view-duplicate="${a(duplicates[0].campaign.id)}">既存キャンペーンを見る</button>` : ''}
             </div>
           </div>

@@ -271,8 +271,63 @@ tr.muted-row td { color: #667085; background: #fafafa; }
 .toast.show { opacity: 1; transform: translateY(0); }
 .split-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .suggested-tags { margin-top: 8px; }
-.discovery-presets { margin-bottom: 0; }
+.discovery-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, .7fr);
+  gap: 16px;
+  align-items: center;
+  background: linear-gradient(135deg, #ffffff 0%, #eef6ff 100%);
+}
+.discovery-hero h2 { font-size: 1.35rem; margin-bottom: 8px; }
+.discovery-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.discovery-steps div {
+  border: 1px solid #cfe0ff;
+  border-radius: var(--radius);
+  background: rgba(255,255,255,.82);
+  padding: 11px;
+}
+.discovery-steps b {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  margin-bottom: 7px;
+}
+.discovery-steps span { display: block; font-size: .84rem; font-weight: 800; color: #334155; }
+.discovery-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.discovery-preset {
+  min-height: 94px;
+  text-align: left;
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid #cfe0ff;
+  box-shadow: 0 10px 24px rgba(37,99,235,.08);
+}
+.discovery-preset span { display: block; font-weight: 900; margin-bottom: 7px; }
+.discovery-preset small { display: block; color: var(--muted); line-height: 1.45; font-weight: 700; }
+.discovery-advanced summary,
+.discovery-more summary {
+  cursor: pointer;
+  font-weight: 900;
+  color: #243b64;
+}
+.discovery-advanced form { margin-top: 12px; }
+.discovery-more { margin-top: 10px; }
+.discovery-more .campaign-list { margin-top: 10px; }
 .discovery-keyword { grid-template-columns: 1fr; }
+.discovery-keyword h3 { margin-bottom: 0; }
+.discovery-actions { margin-top: 9px; }
 .candidate-preview { display: grid; gap: 12px; margin-top: 14px; }
 .preview-grid {
   display: grid;
@@ -289,7 +344,8 @@ tr.muted-row td { color: #667085; background: #fafafa; }
 
 @media (max-width: 860px) {
   .app { width: min(100% - 18px, 1220px); padding-top: 14px; }
-  header, .two, .three, .detail-layout, .form-grid, .preview-grid { grid-template-columns: 1fr; }
+  header, .two, .three, .detail-layout, .form-grid, .preview-grid, .discovery-hero, .discovery-preset-grid { grid-template-columns: 1fr; }
+  .discovery-steps { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .campaign { grid-template-columns: 1fr; }
   .score { text-align: left; }

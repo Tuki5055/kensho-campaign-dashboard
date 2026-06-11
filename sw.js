@@ -1,5 +1,5 @@
 const CACHE_NAME = 'kensho-dashboard-v1.2.0';
-const APP_ASSET_VERSION = '20260610-pwa-final';
+const APP_ASSET_VERSION = '20260611-discovery-simple';
 const withVersion = path => `${path}?v=${APP_ASSET_VERSION}`;
 
 const ASSETS = [

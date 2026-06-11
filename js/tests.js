@@ -483,7 +483,7 @@
     });
     test('PWA: service worker has cache name', () => {
       const sw = readText('sw.js');
-      assertIncludes(sw, 'kensho-dashboard-v1.3.0', 'service worker should have versioned cache');
+      assertIncludes(sw, 'kensho-dashboard-v1.3.1', 'service worker should have versioned cache');
       assertIncludes(sw, 'cache.addAll', 'service worker should precache assets');
     });
     test('PWA: service worker uses update-friendly strategies', () => {
@@ -536,6 +536,15 @@
     test('Discovery: Google search URL is generated', () => {
       const url = K.Discovery.buildGoogleSearchUrl('QUOカード キャンペーン');
       assertIncludes(url, 'https://www.google.com/search?q=', 'Google search URL should be generated');
+    });
+    test('Discovery: Instagram keyword is generated without site prefix', () => {
+      const keyword = K.Discovery.buildInstagramSearchKeyword('site:instagram.com プレゼントキャンペーン ハッシュタグ');
+      assertEqual(keyword, 'プレゼントキャンペーン ハッシュタグ', 'Instagram copy keyword should be plain text');
+    });
+    test('Discovery UI: Instagram target shows Instagram copy action', () => {
+      const html = K.UI.discoveryKeywordCard('site:instagram.com プレゼントキャンペーン ハッシュタグ', { targets: ['Instagram'] });
+      assertIncludes(html, 'Instagram用コピー', 'Instagram copy action should be visible');
+      assertFalse(html.includes('Xで探す'), 'X action should not show for Instagram-only criteria');
     });
     test('Discovery: unsafe import URL is rejected by normalization', () => {
       const candidate = K.Discovery.createCampaignCandidate({ url: 'javascript:alert(1)', body: 'Amazonギフト券をプレゼント。' });

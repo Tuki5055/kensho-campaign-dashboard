@@ -101,6 +101,10 @@
     return `https://www.google.com/search?q=${encodeURIComponent(K.safeText(keyword, 300))}`;
   };
 
+  K.Discovery.buildInstagramSearchKeyword = function (keyword) {
+    return K.safeText(keyword.replace(/^site:instagram\.com\s*/i, ''), 300);
+  };
+
   K.Discovery.createCampaignCandidate = function (input = {}) {
     const body = K.safeText(input.body || input.text || '', 8000);
     const parsed = K.Parser.parseCampaignText(body);

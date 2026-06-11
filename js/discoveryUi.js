@@ -29,7 +29,7 @@
       <section class="panel grid">
         <h2>よく使う探し方</h2>
         ${K.UI.discoveryPresetHtml()}
-        <details class="filter-panel discovery-advanced">
+        <details class="filter-panel discovery-advanced" ${K.state.discoveryAdvancedOpen ? 'open' : ''}>
           <summary>こだわって条件を変える</summary>
           <form id="discoveryCriteriaForm">
             <div class="filter-grid">
@@ -123,6 +123,7 @@
   K.UI.discoveryKeywordCard = function (keyword, criteria) {
     const xUrl = K.Discovery.buildXSearchUrl(keyword);
     const googleUrl = K.Discovery.buildGoogleSearchUrl(keyword);
+    const instagramKeyword = K.Discovery.buildInstagramSearchKeyword(keyword);
     const canGoogle = criteria.targets.includes('Google検索') || criteria.targets.includes('公式サイト') || criteria.targets.includes('キャンペーンまとめサイト');
     return `
       <article class="campaign discovery-keyword">
@@ -131,6 +132,7 @@
           <div class="action-grid discovery-actions">
             ${criteria.targets.includes('X') ? `<a href="${a(xUrl)}" target="_blank" rel="noopener noreferrer" data-discovery-open="${a(keyword)}" data-discovery-url="${a(xUrl)}">Xで探す</a>` : ''}
             ${canGoogle ? `<a href="${a(googleUrl)}" target="_blank" rel="noopener noreferrer" data-discovery-open="${a(keyword)}" data-discovery-url="${a(googleUrl)}">Googleで探す</a>` : ''}
+            ${criteria.targets.includes('Instagram') ? `<button type="button" class="secondary tiny" data-copy-instagram-keyword="${a(instagramKeyword)}">Instagram用コピー</button>` : ''}
             <button type="button" class="secondary tiny" data-copy-keyword="${a(keyword)}">コピー</button>
           </div>
         </div>
@@ -240,9 +242,11 @@
     document.querySelectorAll('[data-discovery-preset]').forEach(btn => btn.addEventListener('click', () => {
       const preset = K.Discovery.PRESETS[btn.dataset.discoveryPreset];
       K.state.discoveryCriteria = K.Discovery.normalizeCriteria(preset || K.Discovery.defaultCriteria());
+      K.state.discoveryAdvancedOpen = false;
       K.UI.render();
     }));
     document.querySelectorAll('[data-copy-keyword]').forEach(btn => btn.addEventListener('click', () => K.UI.copyText(btn.dataset.copyKeyword, 'キーワードをコピーしました')));
+    document.querySelectorAll('[data-copy-instagram-keyword]').forEach(btn => btn.addEventListener('click', () => K.UI.copyText(btn.dataset.copyInstagramKeyword, 'Instagram用キーワードをコピーしました')));
     document.querySelectorAll('[data-discovery-open]').forEach(link => link.addEventListener('click', () => {
       K.Discovery.addDiscoveryHistory({
         keyword: link.dataset.discoveryOpen,
@@ -254,6 +258,11 @@
     }));
 
     const importForm = document.getElementById('discoveryImportForm');
+    criteriaForm.querySelectorAll('input[type="checkbox"]').forEach(input => input.addEventListener('change', () => {
+      K.state.discoveryCriteria = K.UI.discoveryCriteriaFromForm(criteriaForm);
+      K.state.discoveryAdvancedOpen = true;
+      K.UI.render();
+    }));
     importForm.addEventListener('submit', event => {
       event.preventDefault();
       K.UI.createDiscoveryCandidate(importForm);

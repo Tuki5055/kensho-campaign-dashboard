@@ -33,6 +33,7 @@
     discoveryCriteria: null,
     discoveryCandidate: null,
     discoveryDraft: null,
+    discoveryAdvancedOpen: false,
     historyFilters: null,
     reminderFilter: 'all',
     reminderSortMode: 'date',
